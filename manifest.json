@@ -1,0 +1,18 @@
+
+{
+  "name": "Dr. Samy - Assistant Médical IA",
+  "short_name": "Dr. Samy",
+  "description": "Votre assistant de santé personnel intelligent",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3774/3774293.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

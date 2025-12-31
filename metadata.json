@@ -1,0 +1,8 @@
+{
+  "name": "Dr. Samy - Assistant Médical IA",
+  "description": "Votre assistant de santé personnel disponible 24/7 pour des diagnostics, analyses d'examens et conseils préventifs.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
