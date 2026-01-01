@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Indispensable pour que les chemins commencent par /assets/
+  base: '/', // Indispensable pour que les chemins commencent par /assets/
   define: {
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
