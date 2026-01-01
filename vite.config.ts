@@ -7,18 +7,14 @@ export default defineConfig({
   define: {
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
-  // On utilise le répertoire courant comme source de fichiers publics 
-  // pour que manifest.json et sw.js soient copiés dans /dist
-  publicDir: '.', 
+  publicDir: '.', // Permet à manifest.json et sw.js d'être copiés dans dist/
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       input: {
         main: './index.html'
-      },
-      // On ignore les fichiers qui ne doivent pas être dans le bundle JS
-      external: ['sw.js', 'manifest.json']
+      }
     }
   }
 });
