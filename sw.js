@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'dr-samy-v5';
+const CACHE_NAME = 'dr-samy-v6';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
