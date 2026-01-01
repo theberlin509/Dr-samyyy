@@ -35,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-5">
           <button
             onClick={onNewChat}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95"
+            className="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 active:scale-95"
           >
             <Plus size={20} />
             Nouveau Chat
@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 key={chat.id}
                 className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all cursor-pointer ${
                   activeId === chat.id 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-900/50' 
+                    ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 shadow-sm border border-brand-100 dark:border-brand-900/50' 
                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400'
                 }`}
                 onClick={() => { onSelectChat(chat.id); onClose(); }}
@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm border ${
               isAlreadyInstalled 
               ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50' 
-              : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-100 dark:border-blue-900/50'
+              : 'text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 border-brand-100 dark:border-brand-900/50'
             }`}
           >
             {isAlreadyInstalled ? <CheckCircle size={18} /> : <Download size={18} />}

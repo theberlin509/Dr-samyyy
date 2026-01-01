@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import InstallPopup from './components/InstallPopup';
 import { geminiService } from './services/geminiService';
-import { Stethoscope, Menu, Moon, Sun } from 'lucide-react';
+import { Menu, Moon, Sun } from 'lucide-react';
 
 const App: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -21,52 +21,41 @@ const App: React.FC = () => {
   const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
 
   useEffect(() => {
-    // 1. Détecter si l'app est déjà lancée en mode "standalone" (PWA installée)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
                         || (window.navigator as any).standalone 
                         || document.referrer.includes('android-app://');
     
     setIsAlreadyInstalled(isStandalone);
 
-    // 2. Capturer le prompt d'installation
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      console.log('✅ Prompt d\'installation PWA prêt');
-      
-      // Optionnel : Afficher le popup automatiquement après 30 secondes si non installé
       if (!isStandalone) {
         setTimeout(() => setShowInstallPopup(true), 30000);
       }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
   const handleInstall = async () => {
     if (isAlreadyInstalled) {
-      alert("Dr. Samy est déjà installé sur votre appareil ! Cherchez l'icône dans vos applications.");
+      alert("Dr. Samy est déjà installé sur votre appareil !");
       setShowInstallPopup(false);
       return;
     }
-
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`Installation PWA résultat : ${outcome}`);
       setDeferredPrompt(null);
       setShowInstallPopup(false);
     } else {
-      // Fallback instructions détaillées
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       if (isIOS) {
-        alert("Pour installer Dr. Samy sur iOS :\n\n1. Cliquez sur l'icône 'Partager' (le carré avec une flèche vers le haut)\n2. Faites défiler et cliquez sur 'Sur l'écran d'accueil'\n3. Validez en cliquant sur 'Ajouter'");
+        alert("Pour installer Dr. Samy sur iOS :\n1. Cliquez sur 'Partager'\n2. 'Sur l'écran d'accueil'\n3. 'Ajouter'");
       } else {
-        alert("Pour installer sur Android :\n\n1. Cliquez sur les 3 points en haut à droite de Chrome\n2. Choisissez 'Installer l'application'\n\nSi l'option n'apparaît pas, assurez-vous que vous n'êtes pas en navigation privée.");
+        alert("Pour installer : Menu > Installer l'application");
       }
       setShowInstallPopup(false);
     }
@@ -76,11 +65,8 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('dr_samy_chats');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        setConversations(parsed);
-      } catch (e) {
-        console.error("Failed to parse history", e);
-      }
+        setConversations(JSON.parse(saved));
+      } catch (e) { console.error(e); }
     }
   }, []);
 
@@ -101,7 +87,6 @@ const App: React.FC = () => {
   }, [theme]);
 
   const currentChat = conversations.find(c => c.id === currentChatId);
-
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const startNewChat = () => {
@@ -114,7 +99,11 @@ const App: React.FC = () => {
     const attachments: string[] = [];
     if (files) {
       for (const file of files) {
-        const base64 = await fileToBase64(file);
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result?.toString().split(',')[1] || "");
+          reader.readAsDataURL(file);
+        });
         attachments.push(base64);
       }
     }
@@ -160,15 +149,12 @@ const App: React.FC = () => {
       };
 
       activeChat.messages.push(aiMsg);
-      
       if (activeChat.messages.length <= 3) {
-        const newTitle = await geminiService.generateTitle(text);
-        activeChat.title = newTitle;
+        activeChat.title = await geminiService.generateTitle(text);
       }
-
       setConversations([...updatedConversations]);
     } catch (error) {
-      console.error("Error:", error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -177,15 +163,6 @@ const App: React.FC = () => {
   const deleteConversation = (id: string) => {
     setConversations(prev => prev.filter(c => c.id !== id));
     if (currentChatId === id) setCurrentChatId(null);
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result?.toString().split(',')[1] || "");
-      reader.onerror = e => reject(e);
-    });
   };
 
   return (
@@ -213,12 +190,15 @@ const App: React.FC = () => {
             </button>
             
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                <Stethoscope size={20} />
+              <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white shadow-lg overflow-hidden">
+                <img src="/logo.png" alt="Dr. Samy" className="w-full h-full object-cover" onError={(e) => {
+                  (e.target as any).style.display = 'none';
+                  (e.target as any).parentElement.innerHTML = '<span class="font-bold text-xs">DrS</span>';
+                }} />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="font-bold text-base tracking-tight text-slate-800 dark:text-slate-100">Dr. Samy</h1>
-                <p className="text-[9px] text-blue-500 font-bold uppercase tracking-widest leading-none">AI Medical Assistant</p>
+              <div className="hidden sm:block leading-none">
+                <h1 className="font-extrabold text-lg tracking-tight text-slate-800 dark:text-slate-100">DrSamy</h1>
+                <p className="text-[9px] text-brand-500 font-bold uppercase tracking-widest">Medical Assistant</p>
               </div>
             </div>
           </div>

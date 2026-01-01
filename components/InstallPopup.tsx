@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Download, X, Smartphone } from 'lucide-react';
 
@@ -19,21 +18,21 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ onInstall, onClose }) => {
             <X size={20} />
           </button>
 
-          <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+          <div className="w-16 h-16 bg-brand-50 dark:bg-brand-900/30 text-brand-500 dark:text-brand-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
             <Smartphone size={32} />
           </div>
 
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-            Installez Dr. Samy
+            Installez DrSamy
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
-            Gardez votre assistant médical à portée de main. Téléchargez l'application pour un accès plus rapide et une meilleure expérience.
+            Gardez votre assistant médical à portée de main pour un accès plus rapide.
           </p>
 
           <div className="space-y-3">
             <button
               onClick={onInstall}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95"
+              className="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 active:scale-95"
             >
               <Download size={18} />
               Télécharger l'application

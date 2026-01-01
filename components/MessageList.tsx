@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Message } from '../types';
 import { User, BrainCircuit } from 'lucide-react';
@@ -16,19 +15,24 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
           className={`flex items-start gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
         >
           <div className={`
-            w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-sm border
+            w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-sm border overflow-hidden
             ${msg.role === 'user' 
-              ? 'bg-blue-600 border-blue-500 text-white' 
-              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-blue-600'}
+              ? 'bg-brand-500 border-brand-400 text-white' 
+              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-brand-600'}
           `}>
-            {msg.role === 'user' ? <User size={20} /> : <BrainCircuit size={20} />}
+            {msg.role === 'user' ? <User size={20} /> : (
+              <img src="/logo.png" className="w-full h-full object-cover scale-110" onError={(e) => {
+                (e.target as any).style.display = 'none';
+                (e.target as any).parentElement.innerHTML = '<span class="font-bold text-[10px]">DrS</span>';
+              }} />
+            )}
           </div>
 
           <div className={`flex flex-col gap-1.5 max-w-[85%] md:max-w-[75%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`
               px-5 py-4 shadow-sm text-[15px] leading-relaxed whitespace-pre-wrap
               ${msg.role === 'user' 
-                ? 'bg-blue-600 text-white rounded-[1.75rem] rounded-tr-none' 
+                ? 'bg-brand-500 text-white rounded-[1.75rem] rounded-tr-none shadow-brand-500/10' 
                 : 'bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-[1.75rem] rounded-tl-none border border-slate-100 dark:border-slate-800'}
             `}>
               {msg.content}
