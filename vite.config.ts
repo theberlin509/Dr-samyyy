@@ -7,17 +7,18 @@ export default defineConfig({
   define: {
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
-  // On ne met pas publicDir: '.' ici pour éviter que Vite ne boucle sur lui-même.
-  // Les fichiers à la racine (manifest.json, sw.js) seront gérés par le build si nécessaire
-  // ou par Vercel via vercel.json.
+  // On utilise le répertoire courant comme source de fichiers publics 
+  // pour que manifest.json et sw.js soient copiés dans /dist
+  publicDir: '.', 
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: false,
     rollupOptions: {
       input: {
         main: './index.html'
-      }
+      },
+      // On ignore les fichiers qui ne doivent pas être dans le bundle JS
+      external: ['sw.js', 'manifest.json']
     }
   }
 });
