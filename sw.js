@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'dr-samy-v3'; // Changement de version pour forcer le refresh
+const CACHE_NAME = 'dr-samy-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -7,7 +7,6 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-  // On force l'installation immédiate
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -17,13 +16,11 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  // Suppression des anciens caches pour nettoyer la page blanche
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Suppression de l\'ancien cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -34,14 +31,22 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ne pas intercepter les requêtes API Google ou les extensions
-  if (event.request.url.includes('google') || event.request.url.includes('extension')) {
+  // Stratégie : Réseau d'abord, sinon Cache
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/'))
+    );
+    return;
+  }
+
+  // Ne pas cacher les appels API ou les fichiers tiers comme Tailwind CDN
+  if (event.request.url.includes('google') || event.request.url.includes('cdn.tailwindcss.com')) {
     return;
   }
 
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
     })
   );
 });
