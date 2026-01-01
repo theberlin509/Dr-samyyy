@@ -1,5 +1,4 @@
-
-const CACHE_NAME = 'dr-samy-v6';
+const CACHE_NAME = 'dr-samy-v7';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -32,7 +31,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Stratégie : Réseau d'abord avec repli sur cache pour la navigation
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/'))
@@ -40,7 +38,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Ne pas intercepter les requêtes Google API (Gemini) ou les extensions
   if (event.request.url.includes('google') || event.request.url.includes('extension')) {
     return;
   }
