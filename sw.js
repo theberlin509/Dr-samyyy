@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'dr-samy-v4';
+const CACHE_NAME = 'dr-samy-v5';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -21,6 +21,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('Nettoyage ancien cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -31,7 +32,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Stratégie : Réseau d'abord, sinon Cache
+  // Stratégie : Réseau d'abord avec repli sur cache pour la navigation
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/'))
@@ -39,8 +40,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Ne pas cacher les appels API ou les fichiers tiers comme Tailwind CDN
-  if (event.request.url.includes('google') || event.request.url.includes('cdn.tailwindcss.com')) {
+  // Ne pas intercepter les requêtes Google API (Gemini) ou les extensions
+  if (event.request.url.includes('google') || event.request.url.includes('extension')) {
     return;
   }
 
