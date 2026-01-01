@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Conversation } from '../types';
-import { Plus, MessageSquare, Trash2, ShieldCheck, Download } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, ShieldCheck, Download, CheckCircle } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,10 +11,11 @@ interface SidebarProps {
   onNewChat: () => void;
   onDeleteChat: (id: string) => void;
   onInstall: () => void;
+  isAlreadyInstalled: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
-  isOpen, onClose, conversations, activeId, onSelectChat, onNewChat, onDeleteChat, onInstall 
+  isOpen, onClose, conversations, activeId, onSelectChat, onNewChat, onDeleteChat, onInstall, isAlreadyInstalled 
 }) => {
   const sortedChats = [...conversations].sort((a, b) => 
     new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime()
@@ -85,10 +85,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-5 border-t dark:border-slate-800 space-y-3">
           <button
             onClick={() => { onInstall(); onClose(); }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold text-sm border border-blue-100 dark:border-blue-900/50"
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm border ${
+              isAlreadyInstalled 
+              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50' 
+              : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-100 dark:border-blue-900/50'
+            }`}
           >
-            <Download size={18} />
-            Installer l'application
+            {isAlreadyInstalled ? <CheckCircle size={18} /> : <Download size={18} />}
+            {isAlreadyInstalled ? "Application installée" : "Installer l'application"}
           </button>
           
           <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">

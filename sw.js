@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-samy-v8';
+const CACHE_NAME = 'dr-samy-v9';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -20,6 +20,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('SW: Nettoyage ancien cache', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -38,7 +39,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Ignorer les requêtes d'API et d'extensions
-  if (event.request.url.includes('google') || event.request.url.includes('extension') || event.request.url.includes('chrome-extension')) {
+  if (
+    event.request.url.includes('google') || 
+    event.request.url.includes('extension') || 
+    event.request.url.includes('chrome-extension')
+  ) {
     return;
   }
 

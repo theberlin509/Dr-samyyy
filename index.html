@@ -2,10 +2,18 @@
 <html lang="fr" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Samy - Assistant Médical IA</title>
+    
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dr. Samy">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3774/3774293.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,6 +34,7 @@
         body {
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
@@ -61,7 +70,6 @@
 <body class="bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
     <noscript>Vous devez activer JavaScript pour utiliser Dr. Samy.</noscript>
     <div id="root"></div>
-    <!-- Vite remplacera automatiquement ce chemin lors du build -->
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>

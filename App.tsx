@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Message, Conversation } from './types';
 import Sidebar from './components/Sidebar';
@@ -16,50 +15,58 @@ const App: React.FC = () => {
     return (localStorage.getItem('dr_samy_theme') as 'light' | 'dark') || 'light';
   });
 
-  // PWA Installation states
+  // PWA States
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
+  const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
 
   useEffect(() => {
-    // Capture the PWA install prompt
+    // 1. Détecter si l'app est déjà lancée en mode "standalone" (PWA installée)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                        || (window.navigator as any).standalone 
+                        || document.referrer.includes('android-app://');
+    
+    setIsAlreadyInstalled(isStandalone);
+
+    // 2. Capturer le prompt d'installation
     const handleBeforeInstallPrompt = (e: any) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      console.log('Install prompt captured');
+      console.log('✅ Prompt d\'installation PWA prêt');
+      
+      // Optionnel : Afficher le popup automatiquement après 30 secondes si non installé
+      if (!isStandalone) {
+        setTimeout(() => setShowInstallPopup(true), 30000);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Timer for 5 minutes (300,000 ms)
-    const timer = setTimeout(() => {
-      setShowInstallPopup(true);
-    }, 300000);
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      clearTimeout(timer);
     };
   }, []);
 
   const handleInstall = async () => {
+    if (isAlreadyInstalled) {
+      alert("Dr. Samy est déjà installé sur votre appareil ! Cherchez l'icône dans vos applications.");
+      setShowInstallPopup(false);
+      return;
+    }
+
     if (deferredPrompt) {
-      // Show the install prompt
       deferredPrompt.prompt();
-      // Wait for the user to respond to the prompt
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
-      // We've used the prompt, and can't use it again, throw it away
+      console.log(`Installation PWA résultat : ${outcome}`);
       setDeferredPrompt(null);
       setShowInstallPopup(false);
     } else {
-      // Fallback instructions for iOS or if prompt is missed
+      // Fallback instructions détaillées
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       if (isIOS) {
-        alert("Pour installer Dr. Samy sur votre iPhone :\n\n1. Appuyez sur le bouton 'Partager' (carré avec flèche en bas)\n2. Faites défiler et appuyez sur 'Sur l'écran d'accueil'");
+        alert("Pour installer Dr. Samy sur iOS :\n\n1. Cliquez sur l'icône 'Partager' (le carré avec une flèche vers le haut)\n2. Faites défiler et cliquez sur 'Sur l'écran d'accueil'\n3. Validez en cliquant sur 'Ajouter'");
       } else {
-        alert("Installation impossible directement. \n\nSur Android : Cliquez sur les 3 points en haut à droite du navigateur et choisissez 'Installer l'application'.");
+        alert("Pour installer sur Android :\n\n1. Cliquez sur les 3 points en haut à droite de Chrome\n2. Choisissez 'Installer l'application'\n\nSi l'option n'apparaît pas, assurez-vous que vous n'êtes pas en navigation privée.");
       }
       setShowInstallPopup(false);
     }
@@ -192,6 +199,7 @@ const App: React.FC = () => {
         onNewChat={startNewChat}
         onDeleteChat={deleteConversation}
         onInstall={handleInstall}
+        isAlreadyInstalled={isAlreadyInstalled}
       />
       
       <main className="flex-1 flex flex-col min-w-0 h-full relative">
