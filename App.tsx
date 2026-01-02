@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Message, Conversation } from './types';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
-import InstallPopup from './components/InstallPopup';
 import { geminiService } from './services/geminiService';
 import { Menu, Moon, Sun } from 'lucide-react';
 
@@ -17,10 +16,10 @@ const App: React.FC = () => {
 
   // PWA States
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallPopup, setShowInstallPopup] = useState(false);
   const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
 
   useEffect(() => {
+    // Détection du mode standalone
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
                         || (window.navigator as any).standalone 
                         || document.referrer.includes('android-app://');
@@ -28,36 +27,47 @@ const App: React.FC = () => {
     setIsAlreadyInstalled(isStandalone);
 
     const handleBeforeInstallPrompt = (e: any) => {
+      console.log('PWA: beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e);
-      if (!isStandalone) {
-        setTimeout(() => setShowInstallPopup(true), 30000);
-      }
+    };
+
+    const handleAppInstalled = () => {
+      console.log('PWA: App was installed');
+      setIsAlreadyInstalled(true);
+      setDeferredPrompt(null);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
   }, []);
 
   const handleInstall = async () => {
+    console.log('PWA: Attempting install...', { deferredPrompt, isAlreadyInstalled });
+    
     if (isAlreadyInstalled) {
       alert("Dr. Samy est déjà installé sur votre appareil !");
-      setShowInstallPopup(false);
       return;
     }
+
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
+      console.log(`PWA: User choice outcome: ${outcome}`);
       setDeferredPrompt(null);
-      setShowInstallPopup(false);
     } else {
+      // Détection iOS vs Android pour instructions manuelles
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       if (isIOS) {
-        alert("Pour installer Dr. Samy sur iOS :\n1. Cliquez sur 'Partager'\n2. 'Sur l'écran d'accueil'\n3. 'Ajouter'");
+        alert("Installation sur iPhone/iPad :\n\n1. Appuyez sur le bouton 'Partager' (carré avec flèche en bas de l'écran)\n2. Faites défiler et choisissez 'Sur l'écran d'accueil'\n3. Appuyez sur 'Ajouter' en haut à droite.");
       } else {
-        alert("Pour installer : Menu > Installer l'application");
+        alert("Installation manuelle :\n\n1. Cliquez sur les 3 points verticaux de votre navigateur (en haut à droite)\n2. Cliquez sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.\n\nNote : Si l'option n'apparaît pas, assurez-vous d'être sur Chrome ou Edge.");
       }
-      setShowInstallPopup(false);
     }
   };
 
@@ -224,13 +234,6 @@ const App: React.FC = () => {
           onSendMessage={handleSendMessage}
         />
       </main>
-
-      {showInstallPopup && (
-        <InstallPopup 
-          onInstall={handleInstall} 
-          onClose={() => setShowInstallPopup(false)} 
-        />
-      )}
     </div>
   );
 };

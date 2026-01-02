@@ -1,14 +1,16 @@
-const CACHE_NAME = 'dr-samy-v9';
+const CACHE_NAME = 'dr-samy-v11';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/logo.png'
 ];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log('SW: Caching assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -20,7 +22,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('SW: Nettoyage ancien cache', cacheName);
+            console.log('SW: Cleaning old cache', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -38,9 +40,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Ignorer les requêtes d'API et d'extensions
+  // Bypass for external APIs
   if (
     event.request.url.includes('google') || 
+    event.request.url.includes('googleapis') ||
     event.request.url.includes('extension') || 
     event.request.url.includes('chrome-extension')
   ) {
