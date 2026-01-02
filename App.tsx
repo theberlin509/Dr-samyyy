@@ -19,23 +19,27 @@ const App: React.FC = () => {
   const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
 
   useEffect(() => {
-    // Détection du mode standalone
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-                        || (window.navigator as any).standalone 
-                        || document.referrer.includes('android-app://');
-    
-    setIsAlreadyInstalled(isStandalone);
+    // Vérification de l'état d'installation
+    const checkStatus = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                          || (window.navigator as any).standalone;
+      setIsAlreadyInstalled(isStandalone);
+    };
+
+    checkStatus();
 
     const handleBeforeInstallPrompt = (e: any) => {
-      console.log('PWA: beforeinstallprompt event fired');
+      // Empêche le navigateur d'afficher son propre prompt automatiquement
       e.preventDefault();
+      // Stocke l'événement pour que notre bouton puisse le déclencher
       setDeferredPrompt(e);
+      console.log('PWA: Prompt prêt à être déclenché');
     };
 
     const handleAppInstalled = () => {
-      console.log('PWA: App was installed');
       setIsAlreadyInstalled(true);
       setDeferredPrompt(null);
+      console.log('PWA: Installé avec succès');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -48,26 +52,18 @@ const App: React.FC = () => {
   }, []);
 
   const handleInstall = async () => {
-    console.log('PWA: Attempting install...', { deferredPrompt, isAlreadyInstalled });
-    
-    if (isAlreadyInstalled) {
-      alert("Dr. Samy est déjà installé sur votre appareil !");
-      return;
-    }
-
     if (deferredPrompt) {
+      // Déclenche DIRECTEMENT le dialogue d'installation du navigateur
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`PWA: User choice outcome: ${outcome}`);
+      console.log(`PWA: Résultat installation: ${outcome}`);
       setDeferredPrompt(null);
+    } else if (isAlreadyInstalled) {
+      console.log("Déjà installé");
     } else {
-      // Détection iOS vs Android pour instructions manuelles
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-      if (isIOS) {
-        alert("Installation sur iPhone/iPad :\n\n1. Appuyez sur le bouton 'Partager' (carré avec flèche en bas de l'écran)\n2. Faites défiler et choisissez 'Sur l'écran d'accueil'\n3. Appuyez sur 'Ajouter' en haut à droite.");
-      } else {
-        alert("Installation manuelle :\n\n1. Cliquez sur les 3 points verticaux de votre navigateur (en haut à droite)\n2. Cliquez sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.\n\nNote : Si l'option n'apparaît pas, assurez-vous d'être sur Chrome ou Edge.");
-      }
+      // Si le prompt n'est pas prêt, on ne peut rien faire de plus "directement"
+      // car le navigateur bloque l'accès à l'installation.
+      console.log("Le navigateur n'a pas encore autorisé l'installation directe.");
     }
   };
 
