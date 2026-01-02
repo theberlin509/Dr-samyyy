@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-samy-v11';
+const CACHE_NAME = 'dr-samy-v12';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -7,32 +7,35 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  // Force l'activation immédiate
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('SW: Caching assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
 self.addEventListener('activate', (event) => {
+  // Prend le contrôle des pages immédiatement sans attendre le rechargement
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('SW: Cleaning old cache', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+    ])
   );
-  return self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
+  // Stratégie : Network First pour le dynamisme, Cache Fallback pour l'offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/'))
@@ -40,13 +43,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Bypass for external APIs
-  if (
-    event.request.url.includes('google') || 
-    event.request.url.includes('googleapis') ||
-    event.request.url.includes('extension') || 
-    event.request.url.includes('chrome-extension')
-  ) {
+  // Ne pas intercepter les requêtes API (Gemini, etc.)
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) {
     return;
   }
 

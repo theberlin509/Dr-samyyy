@@ -19,7 +19,6 @@ const App: React.FC = () => {
   const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
 
   useEffect(() => {
-    // Vérification de l'état d'installation
     const checkStatus = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
                           || (window.navigator as any).standalone;
@@ -29,17 +28,15 @@ const App: React.FC = () => {
     checkStatus();
 
     const handleBeforeInstallPrompt = (e: any) => {
-      // Empêche le navigateur d'afficher son propre prompt automatiquement
       e.preventDefault();
-      // Stocke l'événement pour que notre bouton puisse le déclencher
       setDeferredPrompt(e);
-      console.log('PWA: Prompt prêt à être déclenché');
+      // Optionnel : on pourrait forcer le prompt ici dès que possible, 
+      // mais il vaut mieux attendre l'action de l'utilisateur sur le bouton.
     };
 
     const handleAppInstalled = () => {
       setIsAlreadyInstalled(true);
       setDeferredPrompt(null);
-      console.log('PWA: Installé avec succès');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -53,17 +50,14 @@ const App: React.FC = () => {
 
   const handleInstall = async () => {
     if (deferredPrompt) {
-      // Déclenche DIRECTEMENT le dialogue d'installation du navigateur
+      // Déclenche instantanément le dialogue système d'installation
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`PWA: Résultat installation: ${outcome}`);
+      console.log(`PWA: ${outcome}`);
       setDeferredPrompt(null);
-    } else if (isAlreadyInstalled) {
-      console.log("Déjà installé");
     } else {
-      // Si le prompt n'est pas prêt, on ne peut rien faire de plus "directement"
-      // car le navigateur bloque l'accès à l'installation.
-      console.log("Le navigateur n'a pas encore autorisé l'installation directe.");
+      // Si le prompt n'est pas prêt, on évite tout popup et on tente juste un log discret
+      console.log("PWA: Prompt non disponible pour le moment");
     }
   };
 
