@@ -25,18 +25,19 @@ const App: React.FC = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
                           || (window.navigator as any).standalone;
       setIsAlreadyInstalled(isStandalone);
+      console.log('PWA: initial install status', { isStandalone });
     };
 
     checkStatus();
 
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
+      console.log('PWA: beforeinstallprompt event captured');
       setDeferredPrompt(e);
-      // Optionnel : on pourrait forcer le prompt ici dès que possible, 
-      // mais il vaut mieux attendre l'action de l'utilisateur sur le bouton.
     };
 
     const handleAppInstalled = () => {
+      console.log('PWA: appinstalled event fired');
       setIsAlreadyInstalled(true);
       setDeferredPrompt(null);
     };
@@ -52,6 +53,7 @@ const App: React.FC = () => {
 
   const handleInstall = async () => {
     if (isAlreadyInstalled) {
+      console.log('PWA: install requested but app is already installed');
       return;
     }
     if (deferredPrompt) {
