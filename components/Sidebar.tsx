@@ -21,6 +21,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime()
   );
 
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
   return (
     <>
       {isOpen && (
@@ -85,14 +88,15 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-5 border-t dark:border-slate-800 space-y-3">
           <button
             onClick={() => { onInstall(); onClose(); }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm border ${
+            disabled={isAlreadyInstalled}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm border disabled:opacity-60 disabled:cursor-not-allowed ${
               isAlreadyInstalled 
               ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50' 
               : 'text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 border-brand-100 dark:border-brand-900/50'
             }`}
           >
             {isAlreadyInstalled ? <CheckCircle size={18} /> : <Download size={18} />}
-            {isAlreadyInstalled ? "Application installée" : "Installer l'application"}
+            {isAlreadyInstalled ? "Application installée" : (isIOS ? "Guide d\u2019installation" : "Installer l'application")}
           </button>
           
           <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">

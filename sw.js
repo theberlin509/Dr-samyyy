@@ -1,9 +1,8 @@
-const CACHE_NAME = 'dr-samy-v12';
+const CACHE_NAME = 'dr-samy-v14';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/logo.png'
+  '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -38,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   // Stratégie : Network First pour le dynamisme, Cache Fallback pour l'offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/'))
+      fetch(event.request).catch(() => caches.match('/index.html'))
     );
     return;
   }
@@ -46,6 +45,12 @@ self.addEventListener('fetch', (event) => {
   // Ne pas intercepter les requêtes API (Gemini, etc.)
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Éviter d'intercepter manifest et icônes pour garantir des ressources à jour
+  if (url.pathname === '/manifest.json' || url.pathname === '/logo.png') {
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
     return;
   }
 

@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import { geminiService } from './services/geminiService';
 import { Menu, Moon, Sun } from 'lucide-react';
+import InstallPopup from './components/InstallPopup';
 
 const App: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   // PWA States
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
+  const [showInstallPopup, setShowInstallPopup] = useState(false);
 
   useEffect(() => {
     const checkStatus = () => {
@@ -49,6 +51,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleInstall = async () => {
+    if (isAlreadyInstalled) {
+      return;
+    }
     if (deferredPrompt) {
       // Déclenche instantanément le dialogue système d'installation
       deferredPrompt.prompt();
@@ -56,7 +61,8 @@ const App: React.FC = () => {
       console.log(`PWA: ${outcome}`);
       setDeferredPrompt(null);
     } else {
-      // Si le prompt n'est pas prêt, on évite tout popup et on tente juste un log discret
+      // Si le prompt n'est pas prêt, afficher un popup d'aide
+      setShowInstallPopup(true);
       console.log("PWA: Prompt non disponible pour le moment");
     }
   };
@@ -224,6 +230,9 @@ const App: React.FC = () => {
           onSendMessage={handleSendMessage}
         />
       </main>
+      {showInstallPopup && (
+        <InstallPopup onInstall={handleInstall} onClose={() => setShowInstallPopup(false)} />
+      )}
     </div>
   );
 };
